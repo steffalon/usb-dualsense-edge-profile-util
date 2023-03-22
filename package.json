@@ -1,0 +1,14 @@
+{
+  "name": "usb_ds5_edge_writer",
+  "version": "1.0.0",
+  "description": "Testing how to create, modify and delete profiles on a DualSense Edge controller.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "usb": "^2.9.0"
+  }
+}
