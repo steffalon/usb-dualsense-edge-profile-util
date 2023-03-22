@@ -4,7 +4,7 @@ The main objective of this project is to enable profile modifications, creation,
 controller. It aims to assist users in configuring joystick inputs, button mapping, and trigger registrations without
 relying on a console.
 
-### Functionality:
+### Functionality
 Currently, users can create and delete profiles on their DualSense Edge controller. Additional features are under
 development.
 
