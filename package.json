@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "crc-32": "^1.2.2",
+    "prompt-sync": "^4.2.0",
     "usb": "^2.9.0"
   }
 }
