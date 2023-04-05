@@ -1,5 +1,6 @@
 const USB = require('usb');
 const CRC32 = require("crc-32");
+const {Profile, ProfileValueAdjustment} = require("./Profile");
 const prompt = require('prompt-sync')({sigint: true});
 
 const SONY_VID = 0x054C;
@@ -68,6 +69,66 @@ let bRequestSetConfigPayloads = [[                  // 12345678
  * 0x04 = Digital
  * 0x05 = Dynamic
  */
+
+const PROFILE_NAME = {
+    Default: 0x00,
+    Quick: 0x01,
+    Precise: 0x02,
+    Steady: 0x03,
+    Digital: 0x04,
+    Dynamic: 0x05,
+}
+
+const profiles = [
+    new Profile(PROFILE_NAME.Default, [
+        new ProfileValueAdjustment(128),
+        new ProfileValueAdjustment(128),
+        new ProfileValueAdjustment(196),
+        new ProfileValueAdjustment(196),
+        new ProfileValueAdjustment(225),
+        new ProfileValueAdjustment(225)
+    ]),
+    new Profile(PROFILE_NAME.Quick, [
+        new ProfileValueAdjustment(38),
+        new ProfileValueAdjustment(38),
+        new ProfileValueAdjustment(122, -3),
+        new ProfileValueAdjustment(139, [6, 5]),
+        new ProfileValueAdjustment(255),
+        new ProfileValueAdjustment(255)
+    ]),
+    new Profile(PROFILE_NAME.Precise, [
+        new ProfileValueAdjustment(70, 3),
+        new ProfileValueAdjustment(57, [-3, -4]),
+        new ProfileValueAdjustment(134, 3),
+        new ProfileValueAdjustment(115, [-6, -7]),
+        new ProfileValueAdjustment(196, 2),
+        new ProfileValueAdjustment(177, [-7, -8])
+    ]),
+    new Profile(PROFILE_NAME.Steady, [
+        new ProfileValueAdjustment(62, -1),
+        new ProfileValueAdjustment(62, -1),
+        new ProfileValueAdjustment(120, -4),
+        new ProfileValueAdjustment(129, [0, -1]),
+        new ProfileValueAdjustment(197, [3, 2]),
+        new ProfileValueAdjustment(179, [-5, -6])
+    ]),
+    new Profile(PROFILE_NAME.Digital, [
+        new ProfileValueAdjustment(38),
+        new ProfileValueAdjustment(38),
+        new ProfileValueAdjustment(38),
+        new ProfileValueAdjustment(75, 18),
+        new ProfileValueAdjustment(255),
+        new ProfileValueAdjustment(255)
+    ]),
+    new Profile(PROFILE_NAME.Dynamic, [
+        new ProfileValueAdjustment(69, [3, 2]),
+        new ProfileValueAdjustment(57, [-3, -4]),
+        new ProfileValueAdjustment(183, [-4, -5]),
+        new ProfileValueAdjustment(198, 3),
+        new ProfileValueAdjustment(255),
+        new ProfileValueAdjustment(255)
+    ]),
+];
 
 const EMPTY_BUFFER_64 = [
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -179,7 +240,25 @@ const createProfile = () => {
             break;
         }
 
-        bRequestSetConfigPayloads[bRequestSetConfigPayloads.length - 1].push(...[...arrayCRC32Le(bRequestSetConfigPayloads), ...[0x00, 0x00, 0x00, 0x00]]);
+        // TODO user can alter curve for every joy-con
+        let joyConL = profiles[2].getHexValuesByIndex(0);
+        let joyConR = profiles[2].getHexValuesByIndex(0);
+
+        for (let i = 47; i < 53; i++) {
+            bRequestSetConfigPayloads[1][i] = joyConL.shift();
+        }
+
+        for (let i = 56; i < 60; i++) {
+            bRequestSetConfigPayloads[1][i] = joyConR.shift();
+        }
+
+        bRequestSetConfigPayloads[2][2] = joyConR.shift();
+        bRequestSetConfigPayloads[2][3] = joyConR.shift();
+
+        bRequestSetConfigPayloads[2][30] = profiles[2].getId();
+        bRequestSetConfigPayloads[2][32] = profiles[2].getId();
+
+        bRequestSetConfigPayloads[2].push(...[...arrayCRC32Le(bRequestSetConfigPayloads), ...[0x00, 0x00, 0x00, 0x00]]);
 
         for (let payload of bRequestSetConfigPayloads) {
             payload[0] = PROFILE_OPTION[profileNumber];
