@@ -1,3 +1,5 @@
+# !!Discontinued!! Use https://github.com/steffalon/dualsense-edge-profile-web-application instead.
+
 # USB DualSense Edge profile utility
 
 The main objective of this project is to enable profile modifications, creation, and deletion for the DualSense Edge
